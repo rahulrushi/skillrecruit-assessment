@@ -18,7 +18,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CalendarDays, CalendarPlus, ChevronDown, FolderGit, House, Settings, SquareTerminal } from "lucide-react";
+import {
+  CalendarDays,
+  CalendarPlus,
+  ChevronDown,
+  FolderGit,
+  House,
+  Settings,
+  SquareTerminal,
+} from "lucide-react";
 import { useWorkspaceStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 
@@ -38,62 +46,69 @@ const AppSidebar = () => {
 
   return (
     <Sidebar>
-      <SidebarHeader>
-        <SidebarMenu>
-          {/* Dropdown for Workspace Selection */}
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
-                  {selectedWorkspace || "Select Workspace"}{" "}
-                  <ChevronDown className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {Object.keys(workspaceMenus).map((workspace) => (
-                  <DropdownMenuItem
-                    key={workspace}
-                    onClick={() => {
-                      setSelectedWorkspace(workspace); // Set the selected workspace
-                      handleMenuItemClick(workspaceMenus[workspace][0].path); // Redirect to the first menu item
-                    }}
-                  >
-                    {workspace}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarGroupContent>
-        {/* Home Menu Item */}
-        <SidebarMenu>
-
-        <SidebarMenuItem>
-        <SidebarMenuButton asChild>
-        
-          <a onClick={handleHomeClick}><House /> Home</a>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        </SidebarMenu>
-
-        {/* Workspace Menu Items */}
-        <SidebarMenu>
-          {selectedWorkspace &&
-            workspaceMenus[selectedWorkspace]?.map((menuItem) => (
-              
-              <SidebarMenuItem key={menuItem.name}>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {/* Dropdown for Workspace Selection */}
+              <SidebarMenuItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton>
+                      {selectedWorkspace || "Select Workspace"}{" "}
+                      <ChevronDown className="ml-auto" />
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {Object.keys(workspaceMenus).map((workspace) => (
+                      <DropdownMenuItem
+                        key={workspace}
+                        onClick={() => {
+                          setSelectedWorkspace(workspace); // Set the selected workspace
+                          handleMenuItemClick(
+                            workspaceMenus[workspace][0].path
+                          ); // Redirect to the first menu item
+                        }}
+                      >
+                        {workspace}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            {/* Home Menu Item */}
+            <SidebarMenu>
+              <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-
-                <a onClick={() => handleMenuItemClick(menuItem.path)}>
-                <menuItem.icon />{menuItem.name}
-                </a>
+                  <a onClick={handleHomeClick}>
+                    <House /> Home
+                  </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-            ))}
-        </SidebarMenu>
-      </SidebarGroupContent>
+            </SidebarMenu>
+
+            {/* Workspace Menu Items */}
+            <SidebarMenu>
+              {selectedWorkspace &&
+                workspaceMenus[selectedWorkspace]?.map((menuItem) => (
+                  <SidebarMenuItem key={menuItem.name}>
+                    <SidebarMenuButton asChild>
+                      <a onClick={() => handleMenuItemClick(menuItem.path)}>
+                        <menuItem.icon />
+                        {menuItem.name}
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
     </Sidebar>
   );
 };

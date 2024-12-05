@@ -1,6 +1,9 @@
+import EditorComponent from "@/components/EditorComponent";
+
 const NewFilePage = () => {
-    return <h1>Create a New File</h1>;
-  };
-  
-  export default NewFilePage;
-  
+  return (
+      <EditorComponent />
+  );
+};
+
+export default NewFilePage;
