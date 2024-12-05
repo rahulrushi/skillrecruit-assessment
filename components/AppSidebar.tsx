@@ -18,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { CalendarDays, CalendarPlus, ChevronDown, FolderGit, House, Settings, SquareTerminal } from "lucide-react";
 import { useWorkspaceStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 
@@ -72,7 +72,8 @@ const AppSidebar = () => {
 
         <SidebarMenuItem>
         <SidebarMenuButton asChild>
-          <a onClick={handleHomeClick}>Home</a>
+        
+          <a onClick={handleHomeClick}><House /> Home</a>
           </SidebarMenuButton>
         </SidebarMenuItem>
         </SidebarMenu>
@@ -81,11 +82,12 @@ const AppSidebar = () => {
         <SidebarMenu>
           {selectedWorkspace &&
             workspaceMenus[selectedWorkspace]?.map((menuItem) => (
+              
               <SidebarMenuItem key={menuItem.name}>
                 <SidebarMenuButton asChild>
 
                 <a onClick={() => handleMenuItemClick(menuItem.path)}>
-                  {menuItem.name}
+                <menuItem.icon />{menuItem.name}
                 </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
