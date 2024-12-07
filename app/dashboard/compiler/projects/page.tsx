@@ -14,12 +14,9 @@ export interface Project {
 }
 
 const languageImages: { [key: string]: string } = {
-  javascript: "/images/languages/javascript.png",
-  python: "/images/languages/python.png",
-  java: "/images/languages/java.png",
-  csharp: "/images/languages/csharp.png",
-  typescript: "/images/languages/typescript.png",
-  // Add more language-to-image mappings here
+  javascript: "/js.png",
+  python: "/python.png",
+  typescript: "/typescript.png",
 };
 
 export default function ProjectsView() {

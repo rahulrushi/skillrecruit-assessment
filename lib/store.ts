@@ -24,17 +24,14 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
     "Code Compiler": [
       { name: "New File", path: "/dashboard/compiler/new", icon: SquareTerminal },
       { name: "Projects", path: "/dashboard/compiler/projects", icon: FolderGit },
-      { name: "Settings", path: "/dashboard/compiler/settings", icon: Settings },
     ],
     "Video Chat": [
       { name: "Join Meeting", path: "/dashboard/chat/join", icon: CalendarPlus },
       { name: "Scheduled Meetings", path: "/dashboard/chat/schedule", icon: CalendarDays },
-      { name: "Chat Settings", path: "/dashboard/chat/settings", icon: Settings },
     ],
     "AI Interview": [
       { name: "Start Interview", path: "/dashboard/interview/start", icon: Settings },
       { name: "Interview History", path: "/dashboard/interview/history", icon: Settings },
-      { name: "Interview Settings", path: "/dashboard/interview/settings", icon: Settings },
     ],
   },
   setSelectedWorkspace: (workspace) => set({ selectedWorkspace: workspace }),
