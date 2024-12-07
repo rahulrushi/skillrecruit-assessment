@@ -1,34 +1,31 @@
 "use client";
-import React, { useRef, useState } from "react";
-import SelectLanguages, {
-  selectedLanguageOptionProps,
-} from "./SelectLanguages";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
+import React, { useRef, useState, useEffect } from "react";
+import SelectLanguages, { selectedLanguageOptionProps } from "./SelectLanguages";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import Editor from "@monaco-editor/react";
 import { Button } from "./ui/button";
-import { Loader, Play, TriangleAlert } from "lucide-react";
-import { codeSnippets, languageOptions } from "@/config/config";
-import { compileCode } from "@/actions/compile";
+import { Loader, Play, Trash, TriangleAlert } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { codeSnippets, languageOptions } from "@/config/config";
+import { compileCode } from "@/actions/compile";
+import { useRouter } from 'next/navigation';
 
-export interface CodeSnippetsProps {
-  [key: string]: string;
-}
 
-export default function EditorComponent() {
+interface EditorUpdateProps {
+    projectId: string;
+  }
+
+  export const EditorUpdate: React.FC<EditorUpdateProps> = ({ projectId }) =>  {
   const [sourceCode, setSourceCode] = useState(codeSnippets["javascript"]);
   const [languageOption, setLanguageOption] = useState(languageOptions[0]);
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState<string[]>([]);
   const [err, setErr] = useState(false);
-  const [codeExecuted, setCodeExecuted] = useState(false);
-
+  const [codeExecuted, setCodeExecuted] = useState(false); 
   const editorRef = useRef(null);
+  const router = useRouter(); 
+
 
   function handleEditorDidMount(editor: any) {
     editorRef.current = editor;
@@ -61,26 +58,22 @@ export default function EditorComponent() {
     try {
       const result = await compileCode(requestData);
       setOutput(result.run.output.split("\n"));
-      setCodeExecuted(true); // Mark as executed
-      console.log(result);
       setLoading(false);
       setErr(false);
+      setCodeExecuted(true); // Mark code as executed
       toast.success("Compiled Successfully");
     } catch (error) {
       setErr(true);
       setLoading(false);
-      toast.error("Failed to compile the Code");
+      setCodeExecuted(false); // Reset the code executed flag on error
+      toast.error("Failed to compile the code");
       console.log(error);
     }
   }
 
   async function saveCode() {
-    if (!codeExecuted || output.length === 0) {
-      alert("Please execute the code first before saving!");
-      return;
-    }
-
     const requestData = {
+      id: projectId,
       language: languageOption.language,
       version: languageOption.version,
       source: sourceCode,
@@ -88,7 +81,7 @@ export default function EditorComponent() {
     };
 
     try {
-      const response = await axios.post("/api/codeProjects", requestData);
+      const response = await axios.patch(`/api/codeProjects/${projectId}`, requestData);
       toast.success("Project saved successfully!");
       console.log("Saved project:", response.data);
     } catch (error) {
@@ -97,28 +90,70 @@ export default function EditorComponent() {
     }
   }
 
+  
+  async function deleteProject() {
+    try {
+      setLoading(true);
+  
+      // Sending DELETE request
+      const response = await axios.delete(`/api/codeProjects/${projectId}`);
+  
+      // If the response status is OK (200), show success message
+      if (response.status === 200) {
+        
+        toast.success("Project deleted successfully!");
+        router.push('/dashboard/compiler/projects');  // Adjust the path to your projects list page
+
+        // Optionally handle the UI change, like redirecting to a list of projects or removing the project from the UI
+      } else {
+        toast.error("Failed to delete the project");
+      }
+  
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      // Catch and handle any errors
+      toast.error("Failed to delete the project");
+      console.error("Delete error:", error);
+    }
+  }
+  
+
+  useEffect(() => {
+    // Fetch project details from the server when the component loads
+    const fetchProject = async () => {
+      try {
+        const response = await axios.get(`/api/codeProjects/${projectId}`);
+        const projectData = response.data;
+        setSourceCode(projectData.source);
+        setLanguageOption({
+          language: projectData.language,
+          version: projectData.version,
+          aliases: [], // You may need to handle aliases depending on your data structure
+        });
+      } catch (error) {
+        toast.error("Failed to load project");
+        console.error("Error fetching project:", error);
+      }
+    };
+
+    fetchProject();
+  }, [projectId]);
+
   return (
     <div className="h-screen w-screen">
-      {/* EDITOR HEADER */}
       <div className="flex items-center justify-between pb-3">
         <h2 className="scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0">
-          Code Compiler
+          Code Compiler - {projectId}
         </h2>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 ">
           <div className="w-[230px]">
-            <SelectLanguages
-              onSelect={onSelect}
-              selectedLanguageOption={languageOption}
-            />
+            <SelectLanguages onSelect={onSelect} selectedLanguageOption={languageOption} />
           </div>
         </div>
       </div>
-      {/* EDITOR */}
       <div className="bg-slate-400 p-3 rounded-2xl">
-        <ResizablePanelGroup
-          direction="horizontal"
-          className="w-full rounded-lg border"
-        >
+        <ResizablePanelGroup direction="horizontal" className="w-full rounded-lg border">
           <ResizablePanel defaultSize={150} minSize={35}>
             <Editor
               theme={"vs-light"}
@@ -137,11 +172,7 @@ export default function EditorComponent() {
               <div className="flex items-center justify-between bg-slate-400 px-6 py-2">
                 <h2>Output</h2>
                 {loading ? (
-                  <Button
-                    disabled
-                    size={"sm"}
-                    className="text-slate-100 bg-slate-800"
-                  >
+                  <Button disabled size={"sm"} className="text-slate-100 bg-slate-800">
                     <Loader className="w-4 h-4 mr-2 animate-spin" />
                     <span>Running please wait...</span>
                   </Button>
@@ -149,6 +180,8 @@ export default function EditorComponent() {
                   <div className="flex gap-4 items-center">
                     {/* Show Save button only after Run button is clicked */}
                     {codeExecuted && (
+                        <div  className="flex gap-4 items-center">
+
                       <Button
                         onClick={saveCode}
                         size="sm"
@@ -156,6 +189,15 @@ export default function EditorComponent() {
                       >
                         Save
                       </Button>
+                       <Button
+                       onClick={deleteProject}
+                       size="sm"
+                       className="text-slate-100 bg-red-600 hover:bg-red-700"
+                     >
+                       <Trash className="w-4 h-4 mr-2" />
+                       Delete
+                     </Button>
+                        </div>
                     )}
                     <Button
                       onClick={executeCode}
@@ -172,14 +214,12 @@ export default function EditorComponent() {
                 {err ? (
                   <div className="flex items-center space-x-2 text-red-500 border border-red-600 px-6 py-6">
                     <TriangleAlert className="w-5 h-5 mr-2 flex-shrink-0" />
-                    <p className="text-xs">
-                      Failed to Compile the Code. Please try again!
-                    </p>
+                    <p className="text-xs">Failed to compile the code. Please try again!</p>
                   </div>
                 ) : (
                   <>
-                    {output.map((item) => (
-                      <p className="text-sm" key={item}>
+                    {output.map((item, index) => (
+                      <p className="text-sm" key={index}>
                         {item}
                       </p>
                     ))}

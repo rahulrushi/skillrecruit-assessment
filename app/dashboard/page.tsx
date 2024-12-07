@@ -5,6 +5,7 @@ import { useEffect } from "react";
 
 const DashboardPage = () => {
   const { selectedWorkspace, workspaceMenus } = useWorkspaceStore();
+  console.log(selectedWorkspace)
   const router = useRouter();
 
   useEffect(() => {

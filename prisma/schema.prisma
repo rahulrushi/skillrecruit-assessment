@@ -12,3 +12,13 @@ model User {
   name  String
   email String @unique
 }
+
+model CodeProject {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  language  String
+  version   String
+  source    String
+  output    String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
